@@ -1,0 +1,37 @@
+relationship AutoDetected_32a2cfcd-2500-4c4e-925c-32046d2f7d22
+	fromColumn: fact_devoluciones.producto_key
+	toColumn: dim_producto.producto_key
+
+relationship AutoDetected_e0896ae9-945e-4214-9a12-167a0412a21f
+	fromColumn: fact_ventas.producto_key
+	toColumn: dim_producto.producto_key
+
+relationship AutoDetected_cc428930-b258-4d01-9741-d722afab5750
+	fromColumn: fact_objetivos.fecha_key
+	toColumn: dim_fecha.fecha_key
+
+relationship AutoDetected_5d835d16-72ee-4075-946b-05b2c1692b89
+	fromColumn: fact_ventas.fecha_key
+	toColumn: dim_fecha.fecha_key
+
+relationship AutoDetected_59e36ad1-02b6-4e9a-bb6c-5431e6823335
+	fromColumn: fact_devoluciones.tienda_key
+	toColumn: dim_tienda.tienda_key
+
+relationship AutoDetected_7859ad3a-bd8a-4aab-8ac8-1c9e638ccb26
+	fromColumn: fact_objetivos.tienda_key
+	toColumn: dim_tienda.tienda_key
+
+relationship AutoDetected_a5cea3ce-98e7-43c2-be9c-be01a91cc121
+	fromColumn: fact_ventas.tienda_key
+	toColumn: dim_tienda.tienda_key
+
+relationship fact_devoluciones_fecha_venta
+	fromColumn: fact_devoluciones.fecha_venta_key
+	toColumn: dim_fecha.fecha_key
+
+relationship fact_devoluciones_fecha_devolucion
+	isActive: false
+	fromColumn: fact_devoluciones.fecha_devolucion_key
+	toColumn: dim_fecha.fecha_key
+

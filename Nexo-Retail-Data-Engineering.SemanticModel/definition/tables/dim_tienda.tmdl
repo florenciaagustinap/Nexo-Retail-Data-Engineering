@@ -1,0 +1,50 @@
+table dim_tienda
+	lineageTag: 55f384e8-98c5-4680-b1e7-12bf4774ade7
+
+	column tienda_key
+		dataType: int64
+		formatString: 0
+		lineageTag: ee1deafd-ef1f-4430-bb6a-f0a476404f81
+		summarizeBy: none
+		sourceColumn: tienda_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_tienda
+		dataType: int64
+		formatString: 0
+		lineageTag: 601faf29-e140-48e5-a607-a9edef2a5b62
+		summarizeBy: sum
+		sourceColumn: id_tienda
+
+		annotation SummarizationSetBy = Automatic
+
+	column pais
+		dataType: string
+		lineageTag: 9bf53d85-b1d7-4ce3-af50-745e5c68286d
+		summarizeBy: none
+		sourceColumn: pais
+
+		annotation SummarizationSetBy = Automatic
+
+	column canal_venta
+		dataType: string
+		lineageTag: 99de5967-be19-4b1b-9e2b-debcc7fae421
+		summarizeBy: none
+		sourceColumn: canal_venta
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_tienda = m
+		mode: import
+		source =
+				let
+				    Origen = DatabricksMultiCloud.Catalogs("dbc-c573bb5a-fda3.cloud.databricks.com", "/sql/1.0/warehouses/4824f486265219de", [Catalog=null, Database=null, QueryTags=null, EnableAutomaticProxyDiscovery=null, Implementation="2.0"]),
+				    nexo_retail_Database = Origen{[Name="nexo_retail",Kind="Database"]}[Data],
+				    gold_Schema = nexo_retail_Database{[Name="gold",Kind="Schema"]}[Data],
+				    dim_tienda_Table = gold_Schema{[Name="dim_tienda",Kind="Table"]}[Data]
+				in
+				    dim_tienda_Table
+
+	annotation PBI_ResultType = Table
+

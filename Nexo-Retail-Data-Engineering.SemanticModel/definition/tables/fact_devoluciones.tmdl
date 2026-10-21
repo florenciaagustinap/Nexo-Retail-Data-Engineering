@@ -1,0 +1,151 @@
+table fact_devoluciones
+	lineageTag: 8034f4f0-9f9d-4554-827c-efcc4e1fbdf4
+
+	measure 'Valor Devuelto' = SUM ( fact_devoluciones[valor_devuelto] )
+		formatString: #,##0.00
+		lineageTag: c83b6698-bafc-4690-bd86-4380fbadf5be
+
+	measure 'Unidades Devueltas' = SUM ( fact_devoluciones[cantidad_devuelta] )
+		formatString: #,##0
+		lineageTag: 7f680052-274b-4213-b0ee-ed354441d5e7
+
+	measure 'Tasa de Devolución %' = DIVIDE ( [Valor Devuelto], [Ventas Totales] )
+		formatString: 0.0%
+		lineageTag: 1865b84e-cd95-459c-bc8b-52be4cc63b89
+
+	measure 'Variación % Devoluciones' =
+			VAR Actual =
+			    [Valor Devuelto]
+			VAR Anterior =
+			    CALCULATE (
+			        [Valor Devuelto],
+			        SAMEPERIODLASTYEAR ( dim_fecha[fecha] )
+			    )
+			RETURN
+			    DIVIDE ( Actual - Anterior, Anterior )
+		formatString: 0.0%
+		lineageTag: 71687159-a7a8-4f8e-a59d-da0f0a55c6c6
+
+	column devolucion_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 6e4c8c70-b63b-48c9-a01a-50c3bfcae27f
+		summarizeBy: sum
+		sourceColumn: devolucion_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_devolucion
+		dataType: int64
+		formatString: 0
+		lineageTag: bb75da69-65a1-4708-b54d-cfd9d3a93592
+		summarizeBy: sum
+		sourceColumn: id_devolucion
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_venta
+		dataType: int64
+		formatString: 0
+		lineageTag: a5fd5368-eb7d-4e50-b7ef-a13ebf9b4941
+		summarizeBy: sum
+		sourceColumn: id_venta
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_venta_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 9e8babbb-6628-4d06-8be1-ecd2e8d8eead
+		summarizeBy: sum
+		sourceColumn: fecha_venta_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_devolucion_key
+		dataType: int64
+		formatString: 0
+		lineageTag: a634bcff-27aa-4b06-902b-a6f2f437afdb
+		summarizeBy: sum
+		sourceColumn: fecha_devolucion_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column producto_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 601bd457-a78c-470b-a8e3-cc567fa3324d
+		summarizeBy: none
+		sourceColumn: producto_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column tienda_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 725e837c-49df-434c-9144-6382c04d18b3
+		summarizeBy: none
+		sourceColumn: tienda_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column cantidad_devuelta
+		dataType: int64
+		formatString: 0
+		lineageTag: aa187ffa-0019-404a-b688-3c5642cdbc75
+		summarizeBy: sum
+		sourceColumn: cantidad_devuelta
+
+		annotation SummarizationSetBy = Automatic
+
+	column precio_unitario
+		dataType: double
+		lineageTag: 90335012-8864-421c-b4bd-85715242d471
+		summarizeBy: sum
+		sourceColumn: precio_unitario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column valor_devuelto
+		dataType: double
+		lineageTag: d2e82d67-e46d-4708-8f1d-c0eab0e3babe
+		summarizeBy: sum
+		sourceColumn: valor_devuelto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column es_venta_huerfana
+		dataType: int64
+		formatString: 0
+		lineageTag: 1904cdc5-9bf7-476c-a8ab-cf05609957db
+		summarizeBy: sum
+		sourceColumn: es_venta_huerfana
+
+		annotation SummarizationSetBy = Automatic
+
+	column es_devolucion_excesiva
+		dataType: int64
+		formatString: 0
+		lineageTag: eb16eb00-78bb-4941-8fe9-c09c024d89b8
+		summarizeBy: sum
+		sourceColumn: es_devolucion_excesiva
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_devoluciones = m
+		mode: import
+		source =
+				let
+				    Origen = DatabricksMultiCloud.Catalogs("dbc-c573bb5a-fda3.cloud.databricks.com", "/sql/1.0/warehouses/4824f486265219de", [Catalog=null, Database=null, QueryTags=null, EnableAutomaticProxyDiscovery=null, Implementation="2.0"]),
+				    nexo_retail_Database = Origen{[Name="nexo_retail",Kind="Database"]}[Data],
+				    gold_Schema = nexo_retail_Database{[Name="gold",Kind="Schema"]}[Data],
+				    fact_devoluciones_Table = gold_Schema{[Name="fact_devoluciones",Kind="Table"]}[Data]
+				in
+				    fact_devoluciones_Table
+
+	annotation PBI_ResultType = Table
+

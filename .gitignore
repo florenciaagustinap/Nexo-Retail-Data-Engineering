@@ -25,3 +25,11 @@ Thumbs.db
 # Credenciales (nunca versionar)
 .databrickscfg
 *.env
+
+# Power BI — versionar el PBIP (.pbip/.Report/.SemanticModel) pero NO el binario ni caches locales
+*.pbix
+**/.pbi/
+*.abf
+**/localSettings.json
+**/editorSettings.json
+**/cache.abf

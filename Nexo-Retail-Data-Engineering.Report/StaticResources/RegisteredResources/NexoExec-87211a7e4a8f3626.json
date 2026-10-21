@@ -1,0 +1,18 @@
+{
+  "name": "NexoExec-87211a7e4a8f3626.json",
+  "dataColors": [
+    "#9DB8D2",
+    "#2E6CB5",
+    "#1AA6A0",
+    "#E1A33A",
+    "#2E8B57",
+    "#C0392B",
+    "#5B6B7B"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1B2A3A",
+  "tableAccent": "#2E6CB5",
+  "good": "#2E8B57",
+  "neutral": "#E1A33A",
+  "bad": "#C0392B"
+}

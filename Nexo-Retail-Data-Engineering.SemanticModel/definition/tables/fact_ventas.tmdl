@@ -1,0 +1,213 @@
+table fact_ventas
+	lineageTag: c46fd2aa-051e-49f0-b50c-7ab1915497e0
+
+	measure 'Ventas Totales' = SUM ( fact_ventas[facturacion] )
+		formatString: #,##0.00
+		lineageTag: 64971146-8257-4ed1-8423-0e8668fbfd11
+
+	measure 'Costo Total' = SUM ( fact_ventas[costo_total] )
+		formatString: #,##0.00
+		lineageTag: 47cf3f53-9f27-47c1-a948-7b0347377ae0
+
+	measure 'Margen Bruto' = [Ventas Totales] - [Costo Total]
+		formatString: #,##0.00
+		lineageTag: 6903b304-db62-4d48-bc19-7ec3bb7a5d53
+
+	measure 'Margen %' = DIVIDE ( [Margen Bruto], [Ventas Totales] )
+		formatString: 0.0%
+		lineageTag: a18d4df7-46ce-4791-9938-fd4932b4b04f
+
+	measure 'Ventas Netas' = [Ventas Totales] - [Valor Devuelto]
+		formatString: #,##0.00
+		lineageTag: 534105c9-b3b3-4c3b-a306-910c907b5e4f
+
+	measure 'Unidades Vendidas' = SUM ( fact_ventas[cantidad] )
+		formatString: #,##0
+		lineageTag: 51c42976-7d8a-40fd-bbff-6733a115a793
+
+	measure 'Variación % Ventas' =
+			VAR Actual =
+			    [Ventas Totales]
+			VAR Anterior =
+			    CALCULATE (
+			        [Ventas Totales],
+			        SAMEPERIODLASTYEAR ( dim_fecha[fecha] )
+			    )
+			RETURN
+			    DIVIDE ( Actual - Anterior, Anterior )
+		formatString: 0.0%
+		lineageTag: 7b71e3d5-cebc-4c57-9204-941fc4765435
+
+	measure 'Variación pp Margen' =
+			[Margen %]
+			    - CALCULATE (
+			        [Margen %],
+			        SAMEPERIODLASTYEAR ( dim_fecha[fecha] )
+			    )
+		formatString: 0.0%
+		lineageTag: 9ed2ff51-93c3-43f7-8774-27b198713a8f
+
+	column venta_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 8246ec48-f67f-4599-bb35-55234dab908b
+		summarizeBy: sum
+		sourceColumn: venta_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_venta
+		dataType: int64
+		formatString: 0
+		lineageTag: a0947ed0-3842-4310-b3fe-05ce5c80b311
+		summarizeBy: sum
+		sourceColumn: id_venta
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 5a0ac6ab-2413-411e-a076-14132422ca49
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column producto_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c99d025-a1be-41ff-8d3d-70dcd50afdcc
+		summarizeBy: none
+		sourceColumn: producto_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column tienda_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 74ad9a68-7d6a-42fc-a7b9-df87294fd716
+		summarizeBy: none
+		sourceColumn: tienda_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_cliente
+		dataType: int64
+		formatString: 0
+		lineageTag: d4f11d6d-e1f9-4e7e-a5b8-d2dfbdefd004
+		summarizeBy: sum
+		sourceColumn: id_cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column categoria_venta
+		dataType: string
+		lineageTag: 3ec6caba-b542-42e3-b6e2-b5d0baca201f
+		summarizeBy: none
+		sourceColumn: categoria_venta
+
+		annotation SummarizationSetBy = Automatic
+
+	column cantidad
+		dataType: int64
+		formatString: 0
+		lineageTag: 54bd6c21-864c-422f-b256-63ee185fbb25
+		summarizeBy: sum
+		sourceColumn: cantidad
+
+		annotation SummarizationSetBy = Automatic
+
+	column precio_unitario
+		dataType: double
+		lineageTag: 7af542f9-e51c-4bfc-912a-800d13bb8773
+		summarizeBy: sum
+		sourceColumn: precio_unitario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column precio_lista
+		dataType: double
+		lineageTag: b8cad92d-8028-4c69-8b07-222c27d4bbc6
+		summarizeBy: sum
+		sourceColumn: precio_lista
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column costo_unitario
+		dataType: double
+		lineageTag: f8df39c0-c3f3-4cbe-8ae6-09ab5d0b7ee3
+		summarizeBy: sum
+		sourceColumn: costo_unitario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column facturacion
+		dataType: double
+		lineageTag: 215343b1-1489-41ae-9cba-ccda70257668
+		summarizeBy: sum
+		sourceColumn: facturacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column costo_total
+		dataType: double
+		lineageTag: 28251a75-7b9e-45cc-ae32-6c82c446c773
+		summarizeBy: sum
+		sourceColumn: costo_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column margen_bruto
+		dataType: double
+		lineageTag: 1415823c-2f2f-4de4-801b-5bb53c4e4b04
+		summarizeBy: sum
+		sourceColumn: margen_bruto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column margen_porcentaje
+		dataType: double
+		lineageTag: 9c8fbdd0-d573-40ff-8e98-a935a3c5efa9
+		summarizeBy: sum
+		sourceColumn: margen_porcentaje
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column descuento_porcentaje
+		dataType: double
+		lineageTag: 6366a0d4-48a0-48d2-befd-28ba6d95c062
+		summarizeBy: sum
+		sourceColumn: descuento_porcentaje
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_ventas = m
+		mode: import
+		source =
+				let
+				    Origen = DatabricksMultiCloud.Catalogs("dbc-c573bb5a-fda3.cloud.databricks.com", "/sql/1.0/warehouses/4824f486265219de", [Catalog=null, Database=null, QueryTags=null, EnableAutomaticProxyDiscovery=null, Implementation="2.0"]),
+				    nexo_retail_Database = Origen{[Name="nexo_retail",Kind="Database"]}[Data],
+				    gold_Schema = nexo_retail_Database{[Name="gold",Kind="Schema"]}[Data],
+				    fact_ventas_Table = gold_Schema{[Name="fact_ventas",Kind="Table"]}[Data]
+				in
+				    fact_ventas_Table
+
+	annotation PBI_ResultType = Table
+

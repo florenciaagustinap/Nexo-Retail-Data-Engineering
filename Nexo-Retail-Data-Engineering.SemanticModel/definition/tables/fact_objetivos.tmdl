@@ -1,0 +1,89 @@
+table fact_objetivos
+	lineageTag: 42843cda-5118-445d-ba41-ca8c83e4d5b4
+
+	measure 'Objetivo de Ventas' = SUM ( fact_objetivos[objetivo_ventas] )
+		formatString: #,##0.00
+		lineageTag: f4f1c233-0fbe-4547-9dd8-a271ecfb088e
+
+	measure 'Cumplimiento de Objetivo %' =
+			VAR AniosConObjetivo =
+			    FILTER (
+			        VALUES ( dim_fecha[anio] ),
+			        NOT ISBLANK ( [Objetivo de Ventas] )
+			    )
+			VAR VentasAlineadas =
+			    CALCULATE ( [Ventas Totales], AniosConObjetivo )
+			RETURN
+			    DIVIDE ( VentasAlineadas, [Objetivo de Ventas] )
+		formatString: 0.0%
+		lineageTag: 36716e2c-b979-47f6-8157-5e0015feee31
+
+	measure 'Brecha vs Objetivo' =
+			VAR AniosConObjetivo =
+			    FILTER (
+			        VALUES ( dim_fecha[anio] ),
+			        NOT ISBLANK ( [Objetivo de Ventas] )
+			    )
+			VAR VentasAlineadas =
+			    CALCULATE ( [Ventas Totales], AniosConObjetivo )
+			VAR Obj =
+			    [Objetivo de Ventas]
+			RETURN
+			    IF (
+			        ISBLANK ( Obj ),
+			        BLANK (),
+			        VentasAlineadas - Obj
+			    )
+		formatString: #,##0.00
+		lineageTag: c1bfcb21-88d9-4563-ac1b-d8cc5180acb8
+
+	column objetivo_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 59376e02-7d43-42d2-8949-37ea14344bd0
+		summarizeBy: sum
+		sourceColumn: objetivo_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_key
+		dataType: int64
+		formatString: 0
+		lineageTag: f5c6633d-4b5e-486b-9b5e-f97cf4266535
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column tienda_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 9b838ec9-420d-4bb0-9199-90ba9c142ee7
+		summarizeBy: none
+		sourceColumn: tienda_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column objetivo_ventas
+		dataType: double
+		lineageTag: cb47c643-e6e6-4a32-baa2-4ce863b319aa
+		summarizeBy: sum
+		sourceColumn: objetivo_ventas
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_objetivos = m
+		mode: import
+		source =
+				let
+				    Origen = DatabricksMultiCloud.Catalogs("dbc-c573bb5a-fda3.cloud.databricks.com", "/sql/1.0/warehouses/4824f486265219de", [Catalog=null, Database=null, QueryTags=null, EnableAutomaticProxyDiscovery=null, Implementation="2.0"]),
+				    nexo_retail_Database = Origen{[Name="nexo_retail",Kind="Database"]}[Data],
+				    gold_Schema = nexo_retail_Database{[Name="gold",Kind="Schema"]}[Data],
+				    fact_objetivos_Table = gold_Schema{[Name="fact_objetivos",Kind="Table"]}[Data]
+				in
+				    fact_objetivos_Table
+
+	annotation PBI_ResultType = Table
+

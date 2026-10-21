@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Nexo-Retail-Data-Engineering"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "aa666935-f1c4-4f34-91fb-ac399fd81e5a"
+  }
+}

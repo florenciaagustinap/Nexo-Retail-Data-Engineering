@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Nexo-Retail-Data-Engineering"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "6672c40b-e9c3-4195-b622-c5bdaf27e77d"
+  }
+}

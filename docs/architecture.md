@@ -27,20 +27,39 @@ Un catálogo `nexo_retail` con tres schemas: `bronze`, `silver`, `gold`.
 - Extrae entidades conformadas (producto, tienda) desde la desnormalización de Ventas.
 
 ### Gold — consumo analítico (star schema)
-- Dimensiones + hechos listos para BI.
-- Marts con las métricas del negocio.
+- Dimensiones + hechos listos para BI, con valores a **nivel transaccional**.
+- **No hay marts materializados.** Las métricas analíticas (ventas netas, margen %, tasa de
+  devolución, cumplimiento, variaciones) se calculan como **medidas DAX en Power BI**, no como
+  tablas en Gold.
 
 ## Tablas por capa
 
 | Capa | Tablas |
 |------|--------|
 | bronze | `ventas`, `devoluciones`, `precios`, `costos`, `objetivos` |
-| silver | `ventas`, `devoluciones`, `precios`, `costos`, `objetivos`, `dim_producto`, `dim_tienda`, `dq_resultados` |
-| gold | `dim_fecha`, `dim_producto`, `dim_tienda`, `fact_ventas`, `fact_devoluciones`, `mart_ventas_netas`, `mart_cumplimiento_objetivo` |
+| silver | `ventas`, `devoluciones`, `precios`, `costos`, `objetivos`, `dim_producto`, `dim_tienda`, `dq_resultados` (+ `*_rejected` de cuarentena) |
+| gold | `dim_fecha`, `dim_producto`, `dim_tienda`, `fact_ventas`, `fact_devoluciones`, `fact_objetivos` |
+
+### Modelo Gold — grano de cada tabla
+| Tabla | Tipo | Grano |
+|-------|------|-------|
+| `gold.dim_fecha` | dimensión | 1 día (Date Table) |
+| `gold.dim_producto` | dimensión | 1 producto |
+| `gold.dim_tienda` | dimensión | 1 tienda |
+| `gold.fact_ventas` | hecho | 1 fila por `ID_Venta` |
+| `gold.fact_devoluciones` | hecho | 1 fila por `ID_Devolucion` |
+| `gold.fact_objetivos` | hecho | 1 fila por mes × tienda (solo 2025) |
 
 > **DimCliente descartada** a propósito: los objetivos son por tienda, la geografía la cubre
 > la tienda y `Nombre_Cliente` es PII ruidosa. Se conserva `ID_Cliente` como **dimensión
 > degenerada** en los hechos (conteo de clientes únicos sin el costo de una dimensión).
+
+> **`dim_producto` conformada a una categoría por producto:** en el origen la
+> `Categoría_Producto` es ambigua (los 101 productos aparecen con 2–4 categorías según la
+> transacción). Se conforma a la **categoría más frecuente** por producto para tener una
+> dimensión consistente y evitar una categoría multivaluada. Afecta levemente (~0,5 pp) solo a
+> métricas por categoría; totales y análisis por país no se ven afectados. Detalle en
+> [data_quality.md](data_quality.md#ambigüedad-de-categoría-de-producto).
 
 ## División PySpark vs Spark SQL
 
@@ -49,7 +68,7 @@ Un catálogo `nexo_retail` con tres schemas: `bronze`, `silver`, `gold`.
 | Setup | subir archivos al Volume | `CREATE CATALOG/SCHEMA/VOLUME` |
 | Bronze | **todo** (lectura con opciones por archivo + metadata) | — |
 | Silver | parsing de fechas/decimales, trim/normalización, dedup, cuarentena | reglas de negocio, point-in-time, entidades conformadas |
-| Gold | orquestación / logging | **todo el modelado** (dims, hechos, MERGE) |
+| Gold | orquestación / logging | **todo el modelado** (dims, hechos, `INSERT OVERWRITE`) |
 
 ## DDL vs ETL (separación asimétrica, a propósito)
 
@@ -85,7 +104,8 @@ fuerza SQL "por SQL". El criterio por capa:
 ## Consumo en Power BI
 
 Power BI → conector Databricks → **SQL Warehouse** → catálogo `nexo_retail`, schema `gold`,
-modo **Import**. Relaciones estrella hechos→dimensiones y medidas DAX sobre los marts.
+modo **Import**. Relaciones estrella hechos→dimensiones y **medidas DAX** (15) calculadas sobre
+los hechos de Gold. El informe es un proyecto **PBIP** versionado (modelo en TMDL, informe en PBIR).
 
 ## Supuestos
 
