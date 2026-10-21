@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Databricks
+.databricks/
+*.dbc
+
+# Spark / Delta local
+spark-warehouse/
+metastore_db/
+derby.log
+*.crc
+_delta_log/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Credenciales (nunca versionar)
+.databrickscfg
+*.env
