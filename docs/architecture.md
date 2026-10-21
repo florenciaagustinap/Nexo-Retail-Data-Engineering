@@ -51,10 +51,36 @@ Un catálogo `nexo_retail` con tres schemas: `bronze`, `silver`, `gold`.
 | Silver | parsing de fechas/decimales, trim/normalización, dedup, cuarentena | reglas de negocio, point-in-time, entidades conformadas |
 | Gold | orquestación / logging | **todo el modelado** (dims, hechos, MERGE) |
 
-## DDL vs ETL
+## DDL vs ETL (separación asimétrica, a propósito)
 
-- `sql/ddl/` → contratos de esquema (`CREATE SCHEMA`, `CREATE TABLE ... USING DELTA`) para Gold y `dq_resultados`.
-- `sql/etl/` → `MERGE INTO` / `INSERT OVERWRITE` que pueblan las tablas.
+- `sql/ddl/` → contratos de esquema (`CREATE TABLE ... USING DELTA`) **solo para Gold**.
+- `sql/etl/` → `INSERT OVERWRITE` que pueblan **las tablas de Gold**.
+
+La separación DDL/ETL en archivos SQL se aplica **únicamente a Gold**, y es una decisión
+deliberada: cada capa usa la tecnología que corresponde a la naturaleza de su trabajo, no se
+fuerza SQL "por SQL". El criterio por capa:
+
+- **Bronze → PySpark.** Ingesta parametrizada por un diccionario de fuentes, con **opciones
+  de lectura por archivo** (delimitador `;` en Costos, encoding, `quote`/`escape`) y **metadata
+  de runtime** (`_ingest_id` por corrida, `_ingested_at`). El esquema es *schema-on-read* (todo
+  string, 1:1 con la fuente); un DDL explícito congelaría el raw y un `CREATE TABLE` por archivo
+  solo duplicaría la lista de columnas de cada CSV. No hay archivos SQL de Bronze.
+
+- **Silver → PySpark + Spark SQL embebido.** PySpark para lo procedural: **parsing** (fechas en
+  dos formatos, decimal con coma), **normalización** (país canónico, regla determinística de
+  canal), **deduplicación** (duplicados exactos + detección de `ID_Venta` conflictivo),
+  **cuarentena** (ruteo de filas a `*_rejected`) y **Data Quality** (log tipado en
+  `dq_resultados` + reconciliación). Spark SQL **donde aporta**: point-in-time de precios
+  (`LEAD`) y dimensiones conformadas (`SELECT DISTINCT`). El esquema de Silver lo define la
+  transformación tipada; un DDL externo sería una segunda fuente de verdad (riesgo de drift).
+  Las tablas (incluida `dq_resultados`) se crean con `saveAsTable` / `CREATE OR REPLACE TABLE`
+  dentro del notebook. No hay archivos SQL de Silver.
+
+- **Gold → DDL y ETL separados en SQL.** Es el **modelo dimensional estable de consumo**: su
+  esquema es un contrato publicado (lo lee Power BI) y su lógica es declarativa/set-based
+  (joins, point-in-time, métricas transaccionales). Por eso el DDL vive en
+  `sql/ddl/gold_tables.sql`, el ETL en `sql/etl/gold_load.sql`, y el notebook
+  `03_gold/01_build_gold.py` actúa como **orquestador** (ejecuta ambos y corre las validaciones).
 
 ## Consumo en Power BI
 
